@@ -1,0 +1,99 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class TicketBooking {
+    private final List<Boolean> seats; // true if booked, false if available
+    private final int totalSeats;
+
+    public TicketBooking(int totalSeats) {
+        this.totalSeats = totalSeats;
+        this.seats = new ArrayList<>(totalSeats);
+        for (int i = 0; i < totalSeats; i++) {
+            seats.add(false); // All seats are initially available
+        }
+    }
+
+    public synchronized boolean bookSeat(int seatNumber) {
+        if (seatNumber < 0 || seatNumber >= totalSeats) {
+            System.out.println("Invalid seat number: " + seatNumber);
+            return false;
+        }
+        if (!seats.get(seatNumber)) {
+            seats.set(seatNumber, true); // Book the seat
+            System.out.println("Seat " + seatNumber + " booked successfully.");
+            return true;
+        } else {
+            System.out.println("Seat " + seatNumber + " is already booked.");
+            return false;
+        }
+    }
+
+    public void showAvailableSeats() {
+        System.out.print("Available seats: ");
+        for (int i = 0; i < totalSeats; i++) {
+            if (!seats.get(i)) {
+                System.out.print(i + " ");
+            }
+        }
+        System.out.println();
+    }
+}
+
+class BookingThread extends Thread {
+    private final TicketBooking ticketBooking;
+    private final int seatNumber;
+
+    public BookingThread(TicketBooking ticketBooking, int seatNumber) {
+        this.ticketBooking = ticketBooking;
+        this.seatNumber = seatNumber;
+    }
+
+    @Override
+    public void run() {
+        ticketBooking.bookSeat(seatNumber);
+    }
+}
+
+public class TicketBookingSystem {
+    public static void main(String[] args) {
+        TicketBooking ticketBooking = new TicketBooking(10); // 10 seats available
+
+        // Show available seats initially
+        ticketBooking.showAvailableSeats();
+
+        // Create threads for VIP bookings (higher priority)
+        BookingThread vipBooking1 = new BookingThread(ticketBooking, 2);
+        BookingThread vipBooking2 = new BookingThread(ticketBooking, 3);
+        vipBooking1.setPriority(Thread.MAX_PRIORITY);
+        vipBooking2.setPriority(Thread.MAX_PRIORITY);
+
+        // Create threads for regular bookings (lower priority)
+        BookingThread regularBooking1 = new BookingThread(ticketBooking, 2);
+        BookingThread regularBooking2 = new BookingThread(ticketBooking, 5);
+        BookingThread regularBooking3 = new BookingThread(ticketBooking, 3);
+        BookingThread regularBooking4 = new BookingThread(ticketBooking, 6);
+
+        // Start all threads
+        vipBooking1.start();
+        vipBooking2.start();
+        regularBooking1.start();
+        regularBooking2.start();
+        regularBooking3.start();
+        regularBooking4.start();
+
+        // Wait for all threads to finish
+        try {
+            vipBooking1.join();
+            vipBooking2.join();
+            regularBooking1.join();
+            regularBooking2.join();
+            regularBooking3.join();
+            regularBooking4.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Show available seats after booking attempts
+        ticketBooking.showAvailableSeats();
+    }
+}
