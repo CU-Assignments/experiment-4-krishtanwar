@@ -1,0 +1,98 @@
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class Card {
+    private String suit;
+    private String rank;
+
+    public Card(String suit, String rank) {
+        this.suit = suit;
+        this.rank = rank;
+    }
+
+    public String getSuit() {
+        return suit;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    @Override
+    public String toString() {
+        return rank + " of " + suit;
+    }
+}
+
+public class CardCollection {
+    private Collection<Card> cards;
+
+    public CardCollection() {
+        cards = new ArrayList<>();
+        initializeCards();
+    }
+
+    private void initializeCards() {
+        String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
+
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                cards.add(new Card(suit, rank));
+            }
+        }
+    }
+
+    public List<Card> findCardsBySuit(String suit) {
+        List<Card> foundCards = new ArrayList<>();
+        for (Card card : cards) {
+            if (card.getSuit().equalsIgnoreCase(suit)) {
+                foundCards.add(card);
+            }
+        }
+        return foundCards;
+    }
+
+    public void displayMenu() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("\nCard Collection System");
+            System.out.println("1. Find Cards by Suit");
+            System.out.println("2. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter the suit (Hearts, Diamonds, Clubs, Spades): ");
+                    String suit = scanner.nextLine();
+                    List<Card> foundCards = findCardsBySuit(suit);
+                    if (foundCards.isEmpty()) {
+                        System.out.println("No cards found for the suit: " + suit);
+                    } else {
+                        System.out.println("Cards found for the suit " + suit + ":");
+                        for (Card card : foundCards) {
+                            System.out.println(card);
+                        }
+                    }
+                    break;
+                case 2:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        CardCollection cardCollection = new CardCollection();
+        cardCollection.displayMenu();
+    }
+}
